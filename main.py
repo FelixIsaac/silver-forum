@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 from ast import Bytes
-import sqlite3,re,base64,os
+import sqlite3,re,base64,os,string,random
+from tempfile import tempdir
 import scrypt
-#h1 = 
+os.remove('login.db')
 global cursor,conn
 conn = sqlite3.connect('login.db')
 cursor = conn.cursor()
@@ -15,7 +16,10 @@ if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetc
     conn.commit()
     
 def hash_password(password):
-    return base64.b64encode(scrypt.encrypt(os.urandom(64), password, maxtime=0.5)).decode()
+    temp=scrypt.encrypt("".join(random.choices(string.ascii_letters+string.digits+string.punctuation,k=256)), password, maxtime=0.5)
+    #print(temp)
+    type(temp)
+    return base64.b64encode(temp).decode()
 
 def verify(username, password):
     result=lookup(username)
@@ -25,10 +29,11 @@ def verify(username, password):
         for i in temp:
             hashed_password=i
             break
+    #print(hashed_password)
     hashed_password=base64.b64decode(hashed_password)
-    print(hashed_password)
+    #print(hashed_password)
     try:
-        scrypt.decrypt(hashed_password, password, maxtime=0.5)
+        scrypt.decrypt(hashed_password, password, 0.5)
         return True
     except scrypt.error:
         return False
@@ -58,10 +63,12 @@ def validate(username,password,email):
     return [True,""]
 
 def add(username,password,email):
-    #result=validate(username,password,email)
-    result=[True]
+    result=validate(username,password,email)
+    #result=[True]
     if result[0]:
-        cursor.execute("""INSERT INTO USERS (USERNAME,PASSWORD,EMAIL) VALUES ("%s","%s","%s");"""%(username,hash_password(password),email))
+        temp=hash_password(password)
+        #print(temp)
+        cursor.execute("""INSERT INTO USERS (USERNAME,PASSWORD,EMAIL) VALUES ("%s","%s","%s");"""%(username,temp,email))
         conn.commit()
     else:
         print('ERORR:',result[1])
@@ -71,8 +78,14 @@ def delete(username):
     conn.commit()
 
 add('ewe','123456789','ee@a.com')
-print(lookup('ewe'))
+add('ee','123456789','ee@aaa.com')
+add('eaa','12345678','ee@aaa.com')
+add('esa','123456789','eeaaa.com')
+#print(lookup('ewe'))
 print(verify('ewe','123456789'))
+cursor.execute("""DELETE FROM USERS WHERE USERNAME = 'ewe';""")
+conn.commit()
+#print(lookup('ewe'))
 conn.close()
 #for name in cursor.execute('select * from "users" where "username" = "paul";'):
 #    print(name)
