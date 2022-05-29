@@ -24,7 +24,7 @@ if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetc
 
 def lookup(username):
     cursor.execute(
-        """SELECT * FROM users WHERE username = ?""",
+        "SELECT * FROM users WHERE username = ?",
         (username,)
     )
 
@@ -61,6 +61,7 @@ def validate(username, password, email):
 
     if lookup(username):
         return [False, "Username or Email already exist."]
+
     return [True, ""]
 
 
@@ -73,14 +74,15 @@ def add(username, password, email):
 
     if result[0]:
         hashed_password = ph.hash(password)
-        print(hashed_password)
 
         cursor.execute(
-            """INSERT INTO USERS (USERNAME, PASSWORD, EMAIL) VALUES (?, ?, ?);""",
+            "INSERT INTO USERS (USERNAME, PASSWORD, EMAIL) VALUES (?, ?, ?);",
             (username, hashed_password, email)
         )
-        
+
         conn.commit()
+
+        return [True, "Added user record"]
     else:
         print('ERROR:', result[1])
         return result[1]
@@ -88,8 +90,9 @@ def add(username, password, email):
 
 def delete(username, password):
     if verify(username, password):
-        cursor.execute("""DELETE FROM users WHERE username = ?;""", (username))
+        cursor.execute("DELETE FROM users WHERE username = ?;", (username))
         conn.commit()
 
 
+print(lookup("*"))
 conn.close()
