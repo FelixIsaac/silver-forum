@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 import sqlite3,re,base64,os,string,random
-from tempfile import tempdir
 import scrypt
-os.remove('login.db')
+
+
 global cursor,conn
 conn = sqlite3.connect('login.db')
 cursor = conn.cursor()
@@ -14,7 +14,7 @@ if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetc
              EMAIL          TEXT    NOT NULL);
             ''')
     conn.commit()
-    
+ 
 def hash_password(password):
     temp=scrypt.encrypt("".join(random.choices(string.ascii_letters+string.digits+string.punctuation,k=256)), password, maxtime=0.5)
     #print(temp)
@@ -80,7 +80,7 @@ def delete(username):
 add('ewe','123456789','ee@a.com')
 
 #tests for username
-a#dd('ee','123456789','ee@aaa.com')
+#dd('ee','123456789','ee@aaa.com')
 #tests for password
 #add('eaa','12345678','ee@aaa.com')
 #test for email
