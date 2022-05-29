@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from ast import Bytes
+
 import sqlite3,re,base64,os,string,random
 from tempfile import tempdir
 import scrypt
@@ -74,17 +74,30 @@ def add(username,password,email):
         print('ERORR:',result[1])
 
 def delete(username):
-    cursor.execute("""INSERT INTO USERS (USERNAME,PASSWORD,EMAIL) VALUES ("%s","%s","%s");"""%(username))
+    cursor.execute("""DELETE FROM USERS WHERE USERNAME = "%s";"""%(username))
     conn.commit()
 
 add('ewe','123456789','ee@a.com')
+
+#tests for username
 add('ee','123456789','ee@aaa.com')
+#tests for password
 add('eaa','12345678','ee@aaa.com')
+#test for email
 add('esa','123456789','eeaaa.com')
+
 #print(lookup('ewe'))
-print(verify('ewe','123456789'))
-cursor.execute("""DELETE FROM USERS WHERE USERNAME = 'ewe';""")
-conn.commit()
+
+if verify('ewe','123456789'):
+    print('corect password')
+else:
+    print('wrong password')
+
+if verify('ewe','123456789000000000'):
+    print('corect password')
+else:
+    print('wrong password')
+
 #print(lookup('ewe'))
 conn.close()
 #for name in cursor.execute('select * from "users" where "username" = "paul";'):
