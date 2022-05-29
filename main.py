@@ -80,23 +80,23 @@ def delete(username):
 add('ewe','123456789','ee@a.com')
 
 #tests for username
-add('ee','123456789','ee@aaa.com')
+a#dd('ee','123456789','ee@aaa.com')
 #tests for password
-add('eaa','12345678','ee@aaa.com')
+#add('eaa','12345678','ee@aaa.com')
 #test for email
-add('esa','123456789','eeaaa.com')
+#add('esa','123456789','eeaaa.com')
 
 #print(lookup('ewe'))
 
-if verify('ewe','123456789'):
-    print('corect password')
-else:
-    print('wrong password')
+#if verify('ewe','123456789'):
+#    print('corect password')
+#else:
+#    print('wrong password')
 
-if verify('ewe','123456789000000000'):
-    print('corect password')
-else:
-    print('wrong password')
+#if verify('ewe','123456789000000000'):
+#    print('corect password')
+#else:
+#    print('wrong password')
 
 #print(lookup('ewe'))
 conn.close()
