@@ -9,8 +9,9 @@ conn = sqlite3.connect('login.db')
 cursor = conn.cursor()
 if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()==[('USERS',)]:
     conn.execute('''CREATE TABLE USERS
-             (USERNAME       TEXT    NOT NULL,
-             PASSWORD       INT     NOT NULL,
+             (ISADMIN       INT     NOT NULL,
+             USERNAME       TEXT    NOT NULL,
+             PASSWORD       TEXT     NOT NULL,
              EMAIL          TEXT    NOT NULL);
             ''')
     conn.commit()
@@ -62,13 +63,14 @@ def validate(username,password,email):
         return [False,"Username or Email already exist."]
     return [True,""]
 
-def add(username,password,email):
+def add(isadmin,username,password,email):
     result=validate(username,password,email)
     #result=[True]
     if result[0]:
         temp=hash_password(password)
         #print(temp)
-        cursor.execute("""INSERT INTO USERS (USERNAME,PASSWORD,EMAIL) VALUES ("%s","%s","%s");"""%(username,temp,email))
+        if isadmin==1:
+            cursor.execute("""INSERT INTO USERS (ISADMIN,USERNAME,PASSWORD,EMAIL) VALUES ("%s","%s","%s","%s");"""%(1,username,temp,email))
         conn.commit()
     else:
         print('ERORR:',result[1])
