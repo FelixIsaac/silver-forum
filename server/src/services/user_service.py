@@ -13,9 +13,11 @@ ph = PasswordHasher()
 if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall() == [('USERS',)]:
     conn.execute('''
         CREATE TABLE USERS (
-            USERNAME       TEXT    NOT NULL,
+            ID             INTEGER PRIMARY KEY,
+            USERNAME       TEXT    UNIQUE NOT NULL,
             PASSWORD       INT     NOT NULL,
-            EMAIL          TEXT    NOT NULL
+            ADMIN          INT     DEFAULT 0 NOT NULL,
+            EMAIL          TEXT    UNIQUE NOT NULL
         );
     ''')
 
@@ -94,5 +96,4 @@ def delete(username, password):
         conn.commit()
 
 
-print(lookup("*"))
 conn.close()
