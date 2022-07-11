@@ -50,3 +50,37 @@ CREATE TABLE IF NOT EXISTS reactions (
 );
 
 ALTER TABLE posts ADD FOREIGN KEY (topic) REFERENCES topics(id);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY NOT NULL,
+    postID INT NOT NULL,
+    -- original comment ID. Null when no original comment
+    parentID INT DEFAULT NULL,
+    body TEXT NOT NULL DEFAULT '',
+    published_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    authorID INT NOT NULL DEFAULT 0,
+    approved BOOLEAN DEFAULT FALSE,
+
+
+    CONSTRAINT fk_post
+        FOREIGN KEY (postID)
+        REFERENCES posts(id),
+
+    CONSTRAINT fk_parent
+        FOREIGN KEY (parentID)
+        REFERENCES comments(id),
+
+    CONSTRAINT fk_author
+        FOREIGN KEY (authorID)
+        REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS comments_reactions (
+    id SERIAL PRIMARY KEY NOT NULL,
+    type INT UNIQUE NOT NULL,
+    commentID INT NOT NULL,
+
+    CONSTRAINT fk_comment
+        FOREIGN KEY (commentID)
+        REFERENCES comments(ID)
+);
