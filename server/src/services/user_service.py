@@ -1,32 +1,21 @@
-#!/usr/bin/python3
-
-import sqlite3
 import re
+from datetime import date
+import psycopg2 as psycopg
 from argon2 import PasswordHasher
 
-conn = sqlite3.connect('login.db')
-cursor = conn.cursor()
+conn = psycopg.connect(
+    host="localhost",
+    database="silverforum",
+    user="postgres",
+    password="7$G5$*M9hnY6vfu!@ZmG!%LqRT#558@U"
+)
+
 ph = PasswordHasher()
-
-# Create "users" table
-# Todo: Switch to PostgreSQL, and move initialisation to .SQL file
-if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall() == [('USERS',)]:
-    conn.execute('''
-        CREATE TABLE USERS (
-            ID             INTEGER PRIMARY KEY,
-            USERNAME       TEXT    UNIQUE NOT NULL,
-            PASSWORD       INT     NOT NULL,
-            ADMIN          INT     DEFAULT 0 NOT NULL,
-            EMAIL          TEXT    UNIQUE NOT NULL
-        );
-    ''')
-
-    conn.commit()
-
+cursor = conn.cursor()
 
 def lookup(username):
     cursor.execute(
-        "SELECT * FROM users WHERE username = ?",
+        "SELECT * FROM users WHERE username = %s",
         (username,)
     )
 
@@ -35,11 +24,14 @@ def lookup(username):
 
 def verify(username, password):
     user = lookup(username)
-    return ph.verify(user[1], password)
+
+    return ph.verify(user[2], password)
 
 
-# Username standards are under https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3
-def validate(username, password, email):
+def validate(username, password, email, birth_year):
+    if date.today().year - birth_year > 12:
+        return [False, "Sorry, you have to at least 13 years old to register."]
+    
     if not (50 >= len(username) and 3 <= len(username)):
         return [False, "Usernames cannot be longer than 50 characters or shorter than 3 characters."]
 
@@ -66,20 +58,21 @@ def validate(username, password, email):
 
     return [True, ""]
 
-
-def add(username, password, email):
+def add(username, password, email, gender, birth_year):
     username = username.strip()
     password = password.strip()
     email = email.lower().strip()
-
-    result = validate(username, password, email)
-
+    
+    result = validate(username, password, email, birth_year)
     if result[0]:
         hashed_password = ph.hash(password)
 
         cursor.execute(
-            "INSERT INTO USERS (USERNAME, PASSWORD, EMAIL) VALUES (?, ?, ?);",
-            (username, hashed_password, email)
+            """
+            INSERT INTO USERS (USERNAME, PASSWORD, EMAIL, GENDER, BIRTH_YEAR)
+               VALUES (%s, %s, %s, %s, %s);
+            """,
+            (username, hashed_password, email, gender, birth_year)
         )
 
         conn.commit()
@@ -92,7 +85,7 @@ def add(username, password, email):
 
 def delete(username, password):
     if verify(username, password):
-        cursor.execute("DELETE FROM users WHERE username = ?;", (username))
+        cursor.execute("DELETE FROM users WHERE username = %s;", (username))
         conn.commit()
 
 
